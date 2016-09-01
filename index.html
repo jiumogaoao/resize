@@ -2,85 +2,61 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>无标题文档</title>
-<style>
-.eewr{
-	width:300px;
-	height:300px;
-	background-color:red;
-	color:#fff;
-	}
-</style>
+<meta name="format-detection" content="telephone=no">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+<title>中钛新</title>
+<link href="css/main.css" rel="stylesheet" rev="stylesheet" type="text/css">
 </head>
-
 <body>
-<div class="eewr">
-sfsdgdsgf
+<div id="all">
+  <div id="loading" style="display: none;"> 
+    <div class="an iconfont">  </div>
+  </div>
+  <div id="main">
+  </div>
+  <div id="pop">
+    <div id="popMain"></div>
+    <div id="popBottomFrame">
+      <button id="popButton" type="button">确定</button>
+    </div>
+  </div>
+  <div id="codePop">
+    <div id="popMain"> <img src="http://" id="codePic">
+      <div id="picCode">
+        <input placeholder="请输入上方图片验证码" id="picCodeInput">
+      </div>
+      <div class="clear"></div>
+    </div>
+    <div id="popBottomFrame">
+      <button id="popButton" type="button">确定</button>
+    </div>
+  </div>
+  <div id="popBg"></div>
 </div>
+<div class="clear"></div>
+<!--[if lt IE 9 ]>
+<script src="js/jquery.js" type="text/javascript"></script>
+<script>
+	var IScroll=function(){
+    return {refresh:function(){}}
+    }
+    window.i8=true;
+</script>
+<!--<![endif]-->
+<!--[if gte IE 9 ]>
+<!-->
+<script src="js/zepto.js"></script> 
+<script src="js/ajax.js"></script> 
+<script src="js/event.js"></script> 
+<script src="js/touch.js"></script> 
+<script src="js/iscroll.js"></script>
+<script type="text/javascript">
+window.i8=false;
+/*干掉默认事件*/
+    document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+</script>
+<!--<![endif]-->
+<script src="js/main.js"></script>
 </body>
 </html>
-<script src="jquery-1.12.4.min.js" type="text/javascript"></script>
-<script type="text/javascript">
-function isIE(){
-	    var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
-    var iIE = userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 ; //判断是否IE浏览器
-    if (iIE) {
-        var reIE = new RegExp("MSIE (\\d+\\.\\d+);");
-        reIE.test(userAgent);
-        var fIEVersion = parseFloat(RegExp["$1"]);
-		return fIEVersion;
-    }else{
-		return false;
-		}
-	}
-function is_mobile() {  
-var regex_match = /(nokia|iphone|android|motorola|^mot-|softbank|foma|docomo|kddi|up.browser|up.link|htc|dopod|blazer|netfront|helio|hosin|huawei|novarra|CoolPad|webos|techfaith|palmsource|blackberry|alcatel|amoi|ktouch|nexian|samsung|^sam-|s[cg]h|^lge|ericsson|philips|sagem|wellcom|bunjalloo|maui|symbian|smartphone|midp|wap|phone|windows ce|iemobile|^spice|^bird|^zte-|longcos|pantech|gionee|^sie-|portalmmm|jigs browser|hiptop|^benq|haier|^lct|operas*mobi|opera*mini|320x320|240x320|176x220)/i;  
-var u = navigator.userAgent;  
-if (null == u) {  
-return true;  
-}  
-var result = regex_match.exec(u);  
-if (null == result) {  
-return false  
-} else {  
-return true  
-}  
-}  
-/*自适应处理*/
-    function resize(){
-		var showSize = 1;
-		if(is_mobile()){
-			showSize = $(window).width()/750;
-			$("body").addClass("phone");
-			$("body").removeClass("browser");
-			}else{
-			if($(window).width()<1200&&$(window).width()>750){
-			showSize = $(window).width()/1200;
-			$("body").addClass("browser");
-			$("body").removeClass("phone");
-			}else if($(window).width()<=750){
-				showSize = $(window).width()/750;
-				$("body").addClass("phone");
-				$("body").removeClass("browser");
-				}else{
-					$("body").addClass("browser");
-					$("body").removeClass("phone");
-					}
-			}
-		
-	if(isIE()&&isIE()<9){
-		$("body").css({
-        "zoom":showSize
-        });
-		}else{
-		$("body").css({
-        "-webkit-transform":"scale("+showSize+")",
-        "transform":"scale("+showSize+")"
-        });	
-			}
-    }
-    /*先执行一次*/
-    resize();
-    /*屏幕有变动的时候再执行*/
-    $(window).on("resize",resize);
-</script>
