@@ -1,3 +1,29 @@
+	var isAndroid=true;
+	var browser = {
+  versions: function () {
+  var u = navigator.userAgent, app = navigator.appVersion;
+  return {//移动终端浏览器版本信息
+   trident: u.indexOf('Trident') > -1, //IE内核
+   presto: u.indexOf('Presto') > -1, //opera内核
+   webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+   gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+   mobile: !!u.match(/AppleWebKit.*Mobile/i) || !!u.match(/MIDP|SymbianOS|NOKIA|SAMSUNG|LG|NEC|TCL|Alcatel|BIRD|DBTEL|Dopod|PHILIPS|HAIER|LENOVO|MOT-|Nokia|SonyEricsson|SIE-|Amoi|ZTE/), //是否为移动终端
+   ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+   android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+   iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者QQHD浏览器
+   iPad: u.indexOf('iPad') > -1, //是否iPad
+   webApp: u.indexOf('Safari') == -1 //是否web应该程序，没有头部与底部
+  };
+  } (),
+  language: (navigator.browserLanguage || navigator.language).toLowerCase()
+}
+if (browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+isAndroid=false;
+}
+if (browser.versions.android) {
+isAndroid=true;
+}
+	
 	var readFn={
         anRun:function(){
             var anRunDelay=setTimeout(function(){
@@ -8,28 +34,29 @@
     }
 	/*滚屏*/
     var scrollArray=[];
-	//alert(window.devicePixelRatio)
     $(document).ready(function(){
         $.each(readFn,function(index,fn){
             fn();
         });
     });
-    
+    /*干掉默认事件*/
+    document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
     /*自适应处理*/
 	function size(){
 		var w=$(window).width();
-		if(navigator.userAgent.indexOf("WindowsWechat")>-1&&$(window).width()>360){
+		if(navigator.userAgent.indexOf("WindowsWechat")>-1){
         w=360;
     }
         return w/750;
 		}
 	function getH(){
 		if(navigator.userAgent.indexOf("WindowsWechat")>-1&&$(window).width()>360){
-			$("#all").css({
+			var left=($(window).width()>360)?($(window).width()-360)/2:0;
+			$("html").css({
 				"float":"none",
 				"box-shadow":"0px 0px 10px 5px rgba(0,0,0,0.3)",
 				"position": "relative",
-				"left":"180px"
+				"left":left+"px"
 				});
             return 1452;
         }else{
@@ -37,121 +64,56 @@
         }
 		}
     function resize(){
-		if(window.i8){
-			$("#all").css({
-			  "zoom":size(),
-              "height":getH()
-});
-			}else{
-			$("#all").css({
+		if(!isAndroid){
+			$("html").removeAttr("style");
+			}
+		var rsDelay=setTimeout(function(){
+			$("html").css({
               "-webkit-transform":"scale("+size()+")",
 			  "transform":"scale("+size()+")",
               "height":getH()
-});	
-				}
+});
+tool.refresh();
+			},(isAndroid?0:500));
 		
 		}
     /*先执行一次*/
-    readFn.rs=resize;
+    readFn.rs=function(){
+        var rsDelay=setTimeout(function(){
+			$("html").css({
+              "-webkit-transform":"scale("+size()+")",
+			  "transform":"scale("+size()+")",
+              "height":getH()
+});
+		},50);
+		};
     /*屏幕有变动的时候再执行*/
     $(window).on("resize",resize);
     
     /************通用方法*************/
     (function(){
-    /*滚屏*/
+		var acDelay=setTimeout(function(){
+			/*滚屏*/
     $(".wrap").each(function(){
         var newScroll=new IScroll('#'+$(this).attr("id"), { probeType: 3 });
         scrollArray.push(newScroll);
         $("img").on("load",function(){
-    $.each(scrollArray,function(index,sc){
-        sc.refresh();
-    })
+    	tool.refresh();
 });
     });
-     /*显示密码*/
-    $(".password .rightIcon").unbind("tap").bind("tap",function(){
-        if($(this).parents(".input_module").find("input").attr("type")=="password"){
-            $(this).parents(".input_module").find("input").attr("type","text");
-            $(this).parents(".input_module").addClass("show");
-            $(this).css("color","#333");
-        }else{
-            $(this).parents(".input_module").find("input").attr("type","password");
-            $(this).parents(".input_module").removeClass("show");
-            $(this).css("color","#8ea7c8");
-        }
-    });
-    
-      /*获取验证码*/
-    $(".getCode .rightButton").unbind("tap").bind("tap",function(){
-        if($(this).parents(".input_module").attr("lock")=="1"){
-            return false;
-        }
-        /*手机号*/
-        var phone=$(this).parents(".input_module").find("input").val();
-        if(!phone){
-            tool.pop("请填写手机号");
-            return false;
-        }
-        if(!tool.phoneCheck(phone)){
-            tool.pop("手机号格式有误");
-            return false;
-        }
-        $(this).parents(".input_module").attr("lock","1");
-        var that=this;
-        var clock=0;
-        var url = '';
-        if($(this).attr("id") =='forgetsendCode'){
-            url = "/用户接口/发送验证码/old";
-        }else{
-            url = "/用户接口/发送验证码";
-        }
-        /*先弹图片验证码*/
-        tool.picCode(function(code){/*图片验证码通过后发送*/
-            $.post(url,{"手机号":phone,"验证码":code},function(json){
-            json = eval("("+json+")");
-            if(json.状态==200){
-                var codeDelay=setInterval(function(){
-                    if(clock<60){
-                        clock++;
-                        $(that).html("重新发送"+(60-clock)+"S");
-                        $(that).addClass("disable");
-                    }else{
-                        $(that).parents(".input_module").attr("lock","0");
-                        $(that).html("获取验证码");
-                        $(that).removeClass("disable");
-                        clearInterval(codeDelay);
-                    }
-                },1000);
-
-            }else{
-                tool.pop(json.状态说明);
-                $(that).parents(".input_module").attr("lock","0");
-                        $(that).html("获取验证码");
-                        $(that).removeClass("disable");
-            }
-        });
-
-        },function(){
-            $(that).parents(".input_module").attr("lock","0");
-        });
-        
-    }); 
-    /*往底部*/
-    $("#toBottom").unbind("tap").bind("tap",function(){
-        $.each(scrollArray,function(index,point){
-            point.scrollTo(0,point.maxScrollY,1000);
-        });
-    });
-    /*选年月*/
-    $(".input_module .dateSelect.year").unbind("change").bind("change",function(){
-        $(this).parents(".input_module").find(".dateInput.year").html($(this).val()+"年");
-    });
-    $(".input_module .dateSelect.month").unbind("change").bind("change",function(){
-        $(this).parents(".input_module").find(".dateInput.month").html($(this).val()+"月");
-    });
+			},200);
     })();
     /************工具方法*************/
     var tool = {};
+	/*重计算滚动*/
+	tool.refresh = function(){
+		var rsDelay=setTimeout(function(){
+			$.each(scrollArray,function(index,sc){
+        sc.refresh();
+    })
+			},200);
+		
+		}
     /*弹出*/
     /*text:弹出内容*/
     /*fn:关闭回调*/
@@ -163,7 +125,7 @@
         $("#pop #popButton").html(buttonName);
         $("#pop").show();
         $("#popBg").show();
-        $("#pop #popButton").unbind("tap").bind("tap",function(){
+        $("#pop #popButton").unbind("click").bind("click",function(e){
             $("#pop").hide();
             $("#popBg").hide();
             if(fn){
@@ -175,36 +137,6 @@
             $("#popBg").hide();
         });
     };
-    /*获取图片验证码*/
-    tool.picCode=function(success,cancel){
-        var url="/用户接口/生成图形验证码";/*获取验证码*/
-        $("#codePop #codePic").attr("src",url);
-        $("#codePop").show();
-        $("#popBg").show();
-        $("#codePop #popButton").unbind("tap").bind("tap",function(){
-            var result=$("#codePop #picCode input").val();
-            if(!result){
-                return false;
-            }
-            if(success){
-              success(result);  
-            }
-            $("#codePop").hide();
-            $("#popBg").hide();
-            $("#codePop #picCode input").val("");
-        });
-        $("#codePop #codePic").unbind("tap").bind("tap",function(){
-            $("#codePop #codePic input").attr("src",url+"?_="+new Date().getTime());
-        });
-        $("#popBg").unbind("tap").bind("tap",function(){
-            if(cancel){
-                cancel();
-            };
-            $("#codePop").hide();
-            $("#popBg").hide();
-            $("#codePop #picCode input").val("");
-        });
-    }
     /*验证手机格式*/
     /*text:手机号*/
     tool.phoneCheck = function(text){
@@ -227,36 +159,6 @@
         }else{
             return false;
         }
-    }
-    /*验证身份证*/
-    /*text:身份证号*/
-    tool.idCodeCheck = function(text){
-        return /(^\d{15}$)|(^\d{17}([0-9]|X)$)/.test(text);
-    }
-    /*图片转码*/
-    tool.pic =function(file,fn) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                fn(e.target.result);
-            };
-            reader.readAsDataURL(file.target.files[0]);
-        };
-    /*下方弹出窗*/
-    tool.bottomPop = function(fn,cancel,cancelFn){
-		if(cancel){
-			$("#popBottom #popBottomCancel").text(cancel);
-			}else{
-				$("#popBottom #popBottomCancel").text("取消");
-				}
-        $("#popBottom").show();
-        $("#popBottom #popBottomFinish").unbind("tap").bind("tap",function(){
-            if(fn){fn()}
-            $("#popBottom").hide();   
-        });	
-		$("#popBottom #popBottomCancel").unbind("tap").bind("tap",function(){
-            if(cancelFn){cancelFn()}
-            $("#popBottom").hide();   
-        });	
     }
     /*loading*/
     tool.loading = {
