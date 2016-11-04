@@ -40,13 +40,17 @@ isAndroid=true;
         });
     });
     /*干掉默认事件*/
-    document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+	if(!isIe8){
+		document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+		}
+    
     /*自适应处理*/
 	function size(){
 		var w=$(window).width();
 		if(navigator.userAgent.indexOf("WindowsWechat")>-1){
         w=360;
     }
+		if(isIe8){w=$("html").width()}
         return w/750;
 		}
 	function getH(){
@@ -68,11 +72,19 @@ isAndroid=true;
 			$("html").removeAttr("style");
 			}
 		var rsDelay=setTimeout(function(){
-			$("html").css({
+			if(isIe8){
+				$("body").css({
+					"zoom":size(),
+					"height":getH()
+					});
+				}else{
+				$("html").css({
               "-webkit-transform":"scale("+size()+")",
 			  "transform":"scale("+size()+")",
               "height":getH()
-});
+});	
+					}
+			
 tool.refresh();
 			},(isAndroid?0:500));
 		
@@ -80,11 +92,17 @@ tool.refresh();
     /*先执行一次*/
     readFn.rs=function(){
         var rsDelay=setTimeout(function(){
+			if(isIe8){
+				$("body").css({
+					"zoom":size()
+					});
+				}else{
 			$("html").css({
               "-webkit-transform":"scale("+size()+")",
 			  "transform":"scale("+size()+")",
               "height":getH()
 });
+				}
 		},50);
 		};
     /*屏幕有变动的时候再执行*/
